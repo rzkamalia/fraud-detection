@@ -16,7 +16,8 @@ async def main():
     
     graph = await agent_graph.graph()
 
-    message = "Hi"
+    message = "What are the primary methods by which credit card fraud is committed?"
+
     config: RunnableConfig = {
         "configurable": {
             "user_id": int(random.randint(1, 1000)),

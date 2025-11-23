@@ -70,6 +70,11 @@ class PdfParserService:
             collection=collection,
             embedding=embeddings,
         )
+        
+        try:
+            vector_store.create_vector_search_index(dimensions=4096)    # run once
+        except Exception:
+            print("Warning: Could not create vector search index since this is a feature that's only available in MongoDB Atlas, not in local MongoDB deployments.")
 
         try:
             vector_store.add_texts(texts=texts, metadatas=metadatas)

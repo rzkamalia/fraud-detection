@@ -10,7 +10,10 @@ from src.core.config import app_config
 from src.core.langfuse import LangfuseConfig
 from src.modules.const.enum import AgentEnum
 from src.modules.schemas.state_schema import State
+from src.modules.tools.pdf_tool import search_pdf_contents
+from src.modules.tools.tabular_data_tool import search_fraud_records
 from src.modules.utils.supervisor_util import format_conversation_history
+
 
 class SupervisorAgent:
 
@@ -41,7 +44,7 @@ class SupervisorAgent:
         )
 
         model = prompt.config.get("model")
-        temperature = prompt.config.get("temperature", 1.0)
+        temperature = prompt.config.get("temperature", 0.0)
 
         llm = ChatOpenAI(
             model=model,
@@ -50,7 +53,7 @@ class SupervisorAgent:
             base_url="https://openrouter.ai/api/v1",
         )
 
-        tools = [pdf_extractor, text2sql]
+        tools = [search_fraud_records, search_pdf_contents]
         agent = create_agent(
             model=llm,
             tools=tools,
@@ -60,6 +63,7 @@ class SupervisorAgent:
             config,
             {
                 "callbacks": [self._langfuse_config._callback],
+                "langfuse_client": self._langfuse_config._client,
             },
         )
 

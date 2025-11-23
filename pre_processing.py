@@ -20,4 +20,4 @@ async def pre_process():
         await db._pg_pool.close()
 
 if __name__ == "__main__":
-    asyncio.run(pre_process())
+    asyncio.run(pre_process())  # run once

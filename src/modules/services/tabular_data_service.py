@@ -17,7 +17,7 @@ class TabularDataService:
         Returns:
             pd.DataFrame: Transformed DataFrame.
         """
-        df = pd.read_csv(app_config.filename)
+        df = pd.read_csv(app_config.tabular_filename)
 
         transformed_df = df.copy()
         

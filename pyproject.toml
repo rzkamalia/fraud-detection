@@ -10,4 +10,8 @@ dependencies = [
     "psycopg[binary,pool]>=3.2.12",
     "pydantic>=2.12.4",
     "pydantic-settings>=2.12.0",
+    "pymongo>=4.15.4",
+    "pymupdf>=1.26.6",
+    "pymupdf4llm>=0.2.2",
+    "streamlit>=1.51.0",
 ]

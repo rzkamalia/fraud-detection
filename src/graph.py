@@ -2,6 +2,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import RetryPolicy
 
+from src.core.langfuse import LangfuseConfig
 from src.modules.agents.supervisor_agent import SupervisorAgent
 from src.modules.const.enum import AgentEnum
 from src.modules.schemas.state_schema import Configuration, State
@@ -9,8 +10,8 @@ from src.modules.schemas.state_schema import Configuration, State
 
 class AgentGraph:
 
-    def __init__(self):
-        self._supervisor = SupervisorAgent()
+    def __init__(self, langfuse_config: LangfuseConfig):
+        self._supervisor = SupervisorAgent(langfuse_config)
 
     def builder(self) -> StateGraph[State, Configuration]:
         """Build the agent graph.

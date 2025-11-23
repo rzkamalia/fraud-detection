@@ -1,7 +1,10 @@
-from typing import cast
-
 import pymupdf
 import pymupdf4llm
+from pydantic import SecretStr
+from typing import cast
+
+from langchain_mongodb.vectorstores import MongoDBAtlasVectorSearch
+from langchain_openai import OpenAIEmbeddings
 
 from src.core.config import app_config
 from src.database import Database
@@ -30,6 +33,9 @@ class PdfParserService:
         except Exception as e:
             print(f"Markdown conversion failed: {e}")
             return []
+        finally:
+            if document is not None:
+                document.close()
 
         pdf_contents = []
         for page in md_text:
@@ -42,20 +48,35 @@ class PdfParserService:
 
         return pdf_contents
     
-    async def _insert(self) -> None:
+    def _insert(self) -> None:
         """Insert PDF content to database.
         """
         pdf_contents = self._parse_content()
-        
-        try:
-            if pdf_contents:
-                async with self._db.get_mongo_db() as db:
-                    collection = db["pdf_contents"]
-                    await collection.insert_many(pdf_contents)
-        except Exception as e:
-            raise RuntimeError(f"Failed to insert PDF contents into database: {e}") from e
+        if not pdf_contents:
+            raise ValueError("No PDF content to insert.")
 
-    async def process(self) -> None:
+        texts = [page["content"] for page in pdf_contents]
+        metadatas = [{"page": page["page_index"]} for page in pdf_contents]
+
+        embeddings = OpenAIEmbeddings(
+                model="qwen/qwen3-embedding-8b",
+                api_key=SecretStr(app_config.openrouter_api_key),
+                base_url="https://openrouter.ai/api/v1",
+            )
+
+        collection = self._db.get_mongo_db()["pdf_contents_vector_store"]
+
+        vector_store = MongoDBAtlasVectorSearch(
+            collection=collection,
+            embedding=embeddings,
+        )
+
+        try:
+            vector_store.add_texts(texts=texts, metadatas=metadatas)
+        except Exception as e:
+            raise RuntimeError(f"Failed to insert PDF embeddings: {e}") from e
+
+    def process(self) -> None:
         """Process the PDF file and insert its content into the database.
         """
-        await self._insert()
+        self._insert()

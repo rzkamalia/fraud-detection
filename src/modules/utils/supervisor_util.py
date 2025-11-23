@@ -7,6 +7,10 @@ def format_conversation_history(messages: list) -> str:
     Returns:
         str: Formatted conversation history.
     """
-    return "\n".join(
-        f"""{message["role"]}: {message["content"]}""" for message in messages
-    ) if messages else ""
+    formatted = []
+    for msg in messages:
+        if msg.content and msg.__class__.__name__ in ["HumanMessage", "AIMessage"]:
+            role = "## User" if msg.__class__.__name__ == "HumanMessage" else "## AI Assistant"
+            formatted.append(f"{role}\n{msg.content}")
+
+    return "\n".join(formatted)

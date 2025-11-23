@@ -6,6 +6,11 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "kagglehub>=0.3.13",
+    "langchain>=1.0.8",
+    "langchain-mongodb>=0.8.0",
+    "langchain-openai>=1.0.3",
+    "langfuse>=3.10.1",
+    "langgraph>=1.0.3",
     "pandas>=2.3.3",
     "psycopg[binary,pool]>=3.2.12",
     "pydantic>=2.12.4",

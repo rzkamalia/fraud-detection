@@ -95,32 +95,4 @@ The following are frameworks used in this fraud detection system.
 4. User Interface
     - **Streamlit**: Creates interactive web applications for data visualization and user interaction
 
-## Demo & Screenshots
-
-### Video Demonstration
-
-A complete walkthrough of the Fraud Detection Agent application is available:
-
-**[Watch the Demo Video](./assets/Screencast%20from%2024-11-25%2020:19:27.gif)** 📹
-
-The video demonstrates:
-- Launching the Streamlit application
-- Interacting with the chat interface
-- Querying the fraud detection system
-- Multi-turn conversations with context preservation
-- Real-time agent responses powered by LLM
-- Integration with PDF and tabular data searches
-
-### How to Run the Demo
-
-1. Follow the **Installation** steps above
-2. Configure `.env` with your API keys (OpenRouter, Langfuse) and database settings
-3. Start the application:
-   ```bash
-   streamlit run app.py
-   ```
-4. Open your browser to `http://localhost:8501`
-5. Type a fraud detection query, e.g.:
-   - "Analyze transaction #12345 for fraud indicators"
-   - "Show me high-risk transactions from the database"
-   - "Search for suspicious PDF documents"
+## [Demo Videoscreen](https://github.com/rzkamalia/fraud-detection/blob/main/assets/demo.webm)

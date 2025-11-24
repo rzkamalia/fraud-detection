@@ -9,12 +9,15 @@ from src.database import Database
 
 
 @tool
-async def search_fraud_records(query: str, runtime: ToolRuntime):
+async def search_fraud_records(query: str, runtime: ToolRuntime) -> str:
     """Search fraud records in SQL database based on user query.
 
     Args:
         query (str): The user's search query.
         runtime (ToolRuntime): The runtime context containing state and config.
+
+    Returns:
+        str: Retrieved fraud records matching the query.
     """
     configurable = runtime.config.get("configurable", {})
 
@@ -24,8 +27,8 @@ async def search_fraud_records(query: str, runtime: ToolRuntime):
 
     db = Database()
     schema = ""
-    async with db.get_postgres_db() as conn:
-        async with conn.cursor() as cursor:
+    try:
+        async with db.get_postgres_db() as conn, conn.cursor() as cursor:
             await cursor.execute("""
                 SELECT table_name, column_name, data_type 
                 FROM information_schema.columns 
@@ -34,7 +37,6 @@ async def search_fraud_records(query: str, runtime: ToolRuntime):
             """)
             schema_rows = await cursor.fetchall()
             
-            # Format schema for the prompt
             current_table = None
             for row in schema_rows:
                 table_name, column_name, data_type = row
@@ -42,6 +44,8 @@ async def search_fraud_records(query: str, runtime: ToolRuntime):
                     schema += f"\n{table_name}:\n"
                     current_table = table_name
                 schema += f"  - {column_name}: {data_type}\n"
+    except Exception as e:
+        return f"Failed to get schema information: {str(e)}"
 
     prompt = langfuse_client.get_prompt(
         "search_fraud_records",
@@ -67,11 +71,13 @@ async def search_fraud_records(query: str, runtime: ToolRuntime):
 
     sql_query = response.content.strip()
 
-    async with db.get_postgres_db() as conn:
-        async with conn.cursor() as cursor:
+    try:
+        async with db.get_postgres_db() as conn, conn.cursor() as cursor:
             await cursor.execute(sql_query)
             results = await cursor.fetchall()
-   
+    except Exception as e:
+        return f"Failed to execute SQL query: {str(e)}"
+    
     results_str = str(results)
 
     return results_str

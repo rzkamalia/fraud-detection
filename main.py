@@ -1,5 +1,6 @@
 import asyncio
 import random
+import streamlit as st
 
 from langchain_core.messages import HumanMessage
 from langchain_core.runnables import RunnableConfig
@@ -16,13 +17,12 @@ async def main():
     
     graph = await agent_graph.graph()
 
-    message = "What are the primary methods by which credit card fraud is committed?"
+    message = "What share of total card fraud value in H1 2023 was due to cross-border transactions?"
 
     config: RunnableConfig = {
         "configurable": {
             "user_id": int(random.randint(1, 1000)),
         },
-        "recursion_limit": 200,
     }
     
     result = await graph.ainvoke(

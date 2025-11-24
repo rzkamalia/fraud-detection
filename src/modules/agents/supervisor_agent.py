@@ -37,7 +37,7 @@ class SupervisorAgent:
         """
         prompt = self._langfuse_config._client.get_prompt(
             AgentEnum.SUPERVISOR.value,
-            label="latest",
+            label="final",
             cache_ttl_seconds=600,
         )
         compiled_prompt = prompt.compile(

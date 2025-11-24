@@ -1,13 +1,12 @@
 from langchain.tools import tool
 from langchain_openai import OpenAIEmbeddings
-from langchain_mongodb import MongoDBAtlasVectorSearch
 from pydantic import SecretStr
 
 from src.core.config import app_config
 from src.database import Database
 
 
-def get_vector_store() -> MongoDBAtlasVectorSearch:
+def get_vector_store():
     """Initialize and return the vector store instance.
     """
     embeddings = OpenAIEmbeddings(
@@ -16,12 +15,6 @@ def get_vector_store() -> MongoDBAtlasVectorSearch:
         base_url="https://openrouter.ai/api/v1",
     )
     
-    collection = Database().get_mongo_db()["pdf_contents_vector_store"]
-    
-    vector_store = MongoDBAtlasVectorSearch(
-        collection=collection,
-        embedding=embeddings,
-    )
     
     return vector_store
 

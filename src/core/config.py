@@ -16,17 +16,13 @@ class Config(BaseSettings):
     postgres_db: str
     postgres_timeout: int
 
-    mongodb_host: str
-    mongodb_user: str
-    mongodb_pass: str
-    mongodb_port: int
-    mongodb_database: str
-
     langfuse_secret_key: str
     langfuse_public_key: str
     langfuse_base_url: str
 
     openrouter_api_key: str
+
+    pdf_vector_table_name: str
     
 
 def get_config() -> Config:

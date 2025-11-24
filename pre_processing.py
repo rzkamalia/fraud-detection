@@ -11,12 +11,11 @@ tabular_data_service = TabularDataService(db)
 
 async def pre_process():
     try:
-        pdf_parser_service.process()
-        await tabular_data_service.process()
+        await pdf_parser_service.process()
+        # await tabular_data_service.process()
     except Exception as e:
         raise RuntimeError(f"An error occurred during pre-processing: {e}") from e
     finally:
-        db._mongo_client.close()
         await db._pg_pool.close()
 
 if __name__ == "__main__":

@@ -3,8 +3,9 @@ import pymupdf4llm
 from pydantic import SecretStr
 from typing import cast
 
-from langchain_mongodb.vectorstores import MongoDBAtlasVectorSearch
+from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
+from langchain_postgres import PGVectorStore
 
 from src.core.config import app_config
 from src.database import Database
@@ -15,11 +16,11 @@ class PdfParserService:
     def __init__(self, db: Database):
         self._db = db
 
-    def _parse_content(self) -> list[dict[str, str]]:
-        """Parse the content of a PDF file and return a list of dictionaries containing the text content of each page.
+    def _parse_content(self) -> list[Document]:
+        """Parse the content of a PDF file and return a list of Document objects containing the text content of each page.
 
         Returns:
-            list[dict[str, str]]: A list of dictionaries containing the text content of each page.
+            list[Document]: A list of Document objects containing the text content of each page.
         """
         try:
             document = pymupdf.open(app_config.pdf_filename)
@@ -40,23 +41,28 @@ class PdfParserService:
         pdf_contents = []
         for page in md_text:
             pdf_contents.append(
-                {
-                    "content": page.get("text"),
-                    "page_index": page.get("metadata", {}).get("page"),
-                }
+                Document(
+                    page_content=page.get("text"),
+                    metadata={
+                        "page": page.get("metadata", {}).get("page")
+                    },
+                )
             )
 
         return pdf_contents
     
-    def _insert(self) -> None:
+    async def _insert(self) -> None:
         """Insert PDF content to database.
         """
-        pdf_contents = self._parse_content()
-        if not pdf_contents:
-            raise ValueError("No PDF content to insert.")
+        pgvector_engine = self._db.get_pgvector_engine()
+        await pgvector_engine.ainit_vectorstore_table(
+            table_name=app_config.pdf_vector_table_name,
+            vector_size=4096,
+        )
 
-        texts = [page["content"] for page in pdf_contents]
-        metadatas = [{"page": page["page_index"]} for page in pdf_contents]
+        docs = self._parse_content()
+        if not docs:
+            raise ValueError("No docs (PDF contents) to insert.")
 
         embeddings = OpenAIEmbeddings(
                 model="qwen/qwen3-embedding-8b",
@@ -64,24 +70,15 @@ class PdfParserService:
                 base_url="https://openrouter.ai/api/v1",
             )
 
-        collection = self._db.get_mongo_db()["pdf_contents_vector_store"]
-
-        vector_store = MongoDBAtlasVectorSearch(
-            collection=collection,
-            embedding=embeddings,
+        store = await PGVectorStore.create(
+            embedding_service=embeddings,
+            engine=pgvector_engine,
+            table_name=app_config.pdf_vector_table_name,
         )
-        
-        try:
-            vector_store.create_vector_search_index(dimensions=4096)    # run once
-        except Exception:
-            print("Warning: Could not create vector search index since this is a feature that's only available in MongoDB Atlas, not in local MongoDB deployments.")
 
-        try:
-            vector_store.add_texts(texts=texts, metadatas=metadatas)
-        except Exception as e:
-            raise RuntimeError(f"Failed to insert PDF embeddings: {e}") from e
+        await store.aadd_documents(docs)
 
-    def process(self) -> None:
+    async def process(self) -> None:
         """Process the PDF file and insert its content into the database.
         """
-        self._insert()
+        await self._insert()

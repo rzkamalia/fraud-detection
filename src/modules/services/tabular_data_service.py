@@ -45,12 +45,12 @@ class TabularDataService:
         return transformed_df[columns_to_select]
 
     async def _create_table(self) -> None:
-        """Create the fraud_detection table if it doesn't exist.
+        """Create the table if it doesn't exist.
         """
         async with self._db.get_postgres_db() as db_conn, db_conn.cursor() as cursor:
             await cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS fraud_detection (
+                f"""
+                CREATE TABLE IF NOT EXISTS {app_config.tabular_table_name} (
                     id SERIAL PRIMARY KEY,
                     transaction_date DATE NOT NULL,
                     merchant VARCHAR(255) NOT NULL,
@@ -77,8 +77,8 @@ class TabularDataService:
         
         async with self._db.get_postgres_db() as db_conn, db_conn.cursor() as cursor:
             await cursor.executemany(
-                """
-                INSERT INTO fraud_detection (transaction_date, merchant, merchant_category, gender, state, job, age, fraud_flag)
+                f"""
+                INSERT INTO {app_config.tabular_table_name} (transaction_date, merchant, merchant_category, gender, state, job, age, fraud_flag)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 data,

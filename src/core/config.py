@@ -23,6 +23,7 @@ class Config(BaseSettings):
     openrouter_api_key: str
 
     pdf_vector_table_name: str
+    tabular_table_name: str
     
 
 def get_config() -> Config:

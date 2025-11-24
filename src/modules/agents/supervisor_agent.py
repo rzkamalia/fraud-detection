@@ -1,6 +1,7 @@
 from pydantic import SecretStr
 
 from langchain.agents import create_agent
+from langchain.agents.middleware import ToolRetryMiddleware
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.runnables.config import merge_configs
@@ -57,6 +58,12 @@ class SupervisorAgent:
         agent = create_agent(
             model=llm,
             tools=tools,
+            middleware=[
+                ToolRetryMiddleware(
+                    max_retries=1,
+                    initial_delay=1.0,
+                )
+            ]
         )
 
         merged_configs = merge_configs(

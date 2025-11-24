@@ -11,5 +11,6 @@ wheels/
 
 .env
 
-assets/
+assets/*.csv
+assets/*.pdf
 parsed_pdfs/

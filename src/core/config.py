@@ -25,10 +25,6 @@ class Config(BaseSettings):
     pdf_vector_table_name: str
     tabular_table_name: str
 
-    langsmith_api_key: str
-    langsmith_project: str
-    langchain_tracing_v2: str
-    
 
 def get_config() -> Config:
     return Config()
@@ -40,7 +36,3 @@ os.environ["OPENROUTER_API_KEY"] = app_config.openrouter_api_key
 os.environ["LANGFUSE_SECRET_KEY"] = app_config.langfuse_secret_key
 os.environ["LANGFUSE_PUBLIC_KEY"] = app_config.langfuse_public_key
 os.environ["LANGFUSE_BASE_URL"] = app_config.langfuse_base_url
-
-os.environ["LANGSMITH_API_KEY"] = app_config.langsmith_api_key
-os.environ["LANGSMITH_PROJECT"] = app_config.langsmith_project
-os.environ["LANGCHAIN_TRACING_V2"] = app_config.langchain_tracing_v2

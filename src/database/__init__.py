@@ -1,6 +1,7 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from langchain_postgres import PGEngine
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from psycopg import AsyncConnection
 from psycopg_pool import AsyncConnectionPool
 
@@ -35,12 +36,14 @@ class Database:
     def __init__(self):
         self._pg_pool = pg_pool
         self._pgvector_engine_pool = pgvector_engine_pool
-        
-    @asynccontextmanager
-    async def get_postgres_db(self) -> AsyncGenerator[AsyncConnection]:
+        self._checkpointer = None
+
+    async def pg_pool_open(self):
         if self._pg_pool.closed:
             await self._pg_pool.open()
-        
+
+    @asynccontextmanager
+    async def get_postgres_db(self) -> AsyncGenerator[AsyncConnection]:
         async with self._pg_pool.connection() as conn:
             try:
                 yield conn
@@ -50,3 +53,14 @@ class Database:
 
     def get_pgvector_engine(self) -> PGEngine:
         return self._pgvector_engine_pool
+    
+    def get_postgres_checkpointer(self) -> AsyncPostgresSaver:
+        if self._checkpointer is None:
+            self._checkpointer = AsyncPostgresSaver(self._pg_pool)
+        return self._checkpointer
+
+    async def setup_checkpointer(self):
+        async with self._pg_pool.connection() as conn:
+            await conn.set_autocommit(True)
+            temp_checkpointer = AsyncPostgresSaver(conn)
+            await temp_checkpointer.setup()

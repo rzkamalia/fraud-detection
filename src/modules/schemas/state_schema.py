@@ -14,7 +14,7 @@ class State(TypedDict):
 
 @dataclass(kw_only=True)
 class Configuration:
-    user_id: int | None = field(default=None)
+    thread_id: str | None = field(default=None)
 
     @classmethod
     def from_runnable_config(cls, config: RunnableConfig | None = None) -> "Configuration":

@@ -3,6 +3,7 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import RetryPolicy
 
 from src.core.langfuse import LangfuseConfig
+from src.database import Database
 from src.modules.agents.supervisor_agent import SupervisorAgent
 from src.modules.const.enum import AgentEnum
 from src.modules.schemas.state_schema import Configuration, State
@@ -10,7 +11,8 @@ from src.modules.schemas.state_schema import Configuration, State
 
 class AgentGraph:
 
-    def __init__(self, langfuse_config: LangfuseConfig):
+    def __init__(self, db: Database, langfuse_config: LangfuseConfig):
+        self._db = db
         self._supervisor = SupervisorAgent(langfuse_config)
 
     def builder(self) -> StateGraph[State, Configuration]:
@@ -41,4 +43,4 @@ class AgentGraph:
         """
         builder = self.builder()
         
-        return builder.compile()
+        return builder.compile(checkpointer=self._db.get_postgres_checkpointer())

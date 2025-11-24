@@ -6,6 +6,7 @@ from langchain_postgres import PGVectorStore
 
 from src.core.config import app_config
 from src.database import Database
+from src.modules.utils.supervisor_util import format_pdf_search_results
 
 
 @tool
@@ -39,4 +40,4 @@ async def search_pdf_contents(query: str) -> str:
     if not results:
         return "No relevant information found in the PDF contents."
     
-    return results
+    return format_pdf_search_results(results)

@@ -60,7 +60,7 @@ class SupervisorAgent:
             tools=tools,
             middleware=[
                 ToolRetryMiddleware(
-                    max_retries=1,
+                    max_retries=3,
                     initial_delay=1.0,
                 )
             ]

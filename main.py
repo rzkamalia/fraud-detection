@@ -36,7 +36,7 @@ async def main():
         config=config,
     )
 
-    print(result)
+    print(result["messages"][-1].content)
 
 
 if __name__ == "__main__":

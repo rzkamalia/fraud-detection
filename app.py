@@ -9,7 +9,8 @@ st.title("Fraud Detection Agent")
 
 @st.cache_resource
 def init_backend():
-    """Initialize backend and cache it for the entire session"""
+    """Initialize backend and cache it for the entire session
+    """
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     db, graph = loop.run_until_complete(initialize_backend())
